@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encontro com Ingrid 💖</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Quicksand', Arial, sans-serif;
+            background-image: url('https://img.freepik.com/vetores-gratis/papel-de-parede-com-padrao-de-coracao-bonito-para-impressao-de-tecido-textil_1017-49356.jpg');
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .screen {
+            display: none;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        h1 {
+            color: #e75480;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        button {
+            background: #ff85a2;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 133, 162, 0.3);
+        }
+
+        button:hover {
+            background: #ff6b9d;
+            transform: translateY(-2px);
+        }
+
+        .back-arrow {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 24px;
+            color: #ff85a2;
+            cursor: pointer;
+            transition: transform 0.3s;
+            background: none;
+            border: none;
+            box-shadow: none;
+            padding: 5px;
+            margin: 0;
+        }
+
+        .back-arrow:hover {
+            transform: scale(1.2);
+            background: none;
+        }
+
+        input[type="date"],
+        input[type="time"],
+        input[type="text"] {
+            padding: 12px;
+            border: 2px solid #ffb3c6;
+            border-radius: 10px;
+            margin: 10px 0;
+            width: 80%;
+            font-size: 1em;
+        }
+
+        .place-option {
+            background: #fff0f6;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .place-option:hover {
+            background: #ffd9e2;
+            transform: scale(1.05);
+        }
+
+        .place-option.selected {
+            background: #ffb3c6;
+            border: 2px solid #ff6b9d;
+            transform: scale(1.05);
+        }
+
+        #summary {
+            background: #fff0f6;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .error-message {
+            color: #e75480;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .heart {
+            color: #ff6b9d;
+            font-size: 1.5em;
+        }
+
+        #sadMessage {
+            display: none;
+            color: #e75480;
+            margin-top: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela 1 -->
+    <div id="screen1" class="screen active">
+        <h1><span class="heart">💖</span> Ingrid, você tem disponibilidade para um encontro comigo? <span class="heart">💖</span></h1>
+        <button id="yesButton">Sim, claro! 😊</button>
+        <button id="noButton">Agora não... 😅</button>
+        <p id="sadMessage">Poxa, que pena... 😢 Queria muito te ver!</p>
+    </div>
+
+    <!-- Tela 2 -->
+    <div id="screen2" class="screen">
+        <button class="back-arrow" onclick="prevScreen(1)">↩️</button>
+        <h1><span class="heart">📅</span> Escolha a data e horário <span class="heart">⏰</span></h1>
+        <input type="date" id="dateInput" required>
+        <input type="time" id="timeInput" required>
+        <p class="error-message" id="dateTimeError">Por favor, selecione data e horário!</p>
+        <button onclick="validateAndContinue()">Continuar 🌸</button>
+    </div>
+
+    <!-- Tela 3 -->
+    <div id="screen3" class="screen">
+        <button class="back-arrow" onclick="prevScreen(2)">↩️</button>
+        <h1><span class="heart">📍</span> Onde vamos? <span class="heart">🍴</span></h1>
+        <div class="place-option" onclick="selectPlaceType('Restaurante')">Restaurante 🍝</div>
+        <div class="place-option" onclick="selectPlaceType('Hamburgueria')">Hamburgueria 🍔</div>
+        <div class="place-option" onclick="selectPlaceType('Outro')">Sugerir outro lugar 💡</div>
+    </div>
+
+    <!-- Tela 4 -->
+    <div id="screen4" class="screen">
+        <button class="back-arrow" onclick="prevScreen(3)">↩️</button>
+        <h1><span class="heart">❤️</span> Escolha o local <span class="heart">❤️</span></h1>
+        <div id="placeOptions"></div>
+        <button onclick="validatePlaceAndContinue()">Continuar 🌸</button>
+        <p class="error-message" id="placeError">Por favor, selecione ou sugira um local!</p>
+    </div>
+
+    <!-- Tela 5 -->
+    <div id="screen5" class="screen">
+        <button class="back-arrow" onclick="prevScreen(4)">↩️</button>
+        <h1><span class="heart">✅</span> Confirme tudo! ✨</h1>
+        <div id="summary"></div>
+        <button onclick="sendEmail()">Confirmar Encontro 💌</button>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      emailjs.init("AJ4DUgLTmqK26jg89");
+
+      let responses = {
+          date: "",
+          time: "",
+          placeType: "",
+          placeName: ""
+      };
+
+      let noButtonClicks = 0;
+
+      // Controle das telas
+      function nextScreen(screenNumber) {
+          document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+          document.getElementById(`screen${screenNumber}`).classList.add('active');
+          
+          if (screenNumber === 5) {
+              document.getElementById('summary').innerHTML = `
+                  📅 Data escolhida:<br><strong>${responses.date}</strong><br><br>
+                  ⏰ Horário:<br><strong>${responses.time}</strong><br><br>
+                  📍 Local:<br><strong>${responses.placeName || responses.placeType}</strong><br><br>`;
+          }
+      }
+
+      function prevScreen(screenNumber) {
+          document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+          document.getElementById(`screen${screenNumber}`).classList.add('active');
+      }
+
+      // Tela inicial - Botão "Não" com limite de 3 fugas
+      document.getElementById('noButton').addEventListener('mouseover', function() {
+          if (noButtonClicks < 3) {
+              this.style.position = 'absolute';
+              this.style.left = Math.random() * (window.innerWidth - this.offsetWidth) + 'px';
+              this.style.top = Math.random() * (window.innerHeight - this.offsetHeight) + 'px';
+              noButtonClicks++;
+          }
+      });
+
+      document.getElementById('noButton').addEventListener('click', function() {
+          if (noButtonClicks >= 3) {
+              document.getElementById('sadMessage').style.display = 'block';
+          }
+      });
+
+      document.getElementById('yesButton').addEventListener('click', () => nextScreen(2));
+
+      // Validação de data e hora
+      function validateAndContinue() {
+          const dateInput = document.getElementById('dateInput');
+          const timeInput = document.getElementById('timeInput');
+          const errorMsg = document.getElementById('dateTimeError');
+          
+          if (!dateInput.value || !timeInput.value) {
+              errorMsg.style.display = 'block';
+              return;
+          }
+          
+          responses.date = dateInput.value;
+          responses.time = timeInput.value;
+          errorMsg.style.display = 'none';
+          nextScreen(3);
+      }
+
+      // Seleção de tipo de lugar
+      function selectPlaceType(type) {
+          responses.placeType = type;
+          responses.placeName = ""; // Reset place name when changing type
+
+          // Highlight selected option
+          document.querySelectorAll('#screen3 .place-option').forEach(option => {
+              if (option.textContent.includes(type)) {
+                  option.classList.add('selected');
+              } else {
+                  option.classList.remove('selected');
+              }
+          });
+
+          const optionsDiv = document.getElementById('placeOptions');
+          optionsDiv.innerHTML = '';
+
+          if (type === 'Restaurante') {
+              optionsDiv.innerHTML += `
+                  <div class='place-option' onclick='selectPlace("Garden Bistro", this)'>Garden Bistro 🌿</div>
+                  <div class='place-option' onclick='selectPlace("Santa Joana", this)'>Santa Joana 🍷</div>`;
+          } else if (type === 'Hamburgueria') {
+              optionsDiv.innerHTML += `
+                  <div class='place-option' onclick='selectPlace("Old Jack", this)'>Old Jack 🍔</div>`;
+          } else if (type === 'Outro') {
+              optionsDiv.innerHTML += `
+                  Sugerir um lugar:<br><input type='text' id='customPlace' placeholder='Digite aqui...' oninput='responses.placeName = this.value'>`;
+          }
+          
+          nextScreen(4);
+      }
+
+      function selectPlace(name, element) {
+          responses.placeName = name;
+          
+          // Highlight selected place
+          document.querySelectorAll('#placeOptions .place-option').forEach(option => {
+              option.classList.remove('selected');
+          });
+          
+          if (element) {
+              element.classList.add('selected');
+          }
+      }
+
+      function validatePlaceAndContinue() {
+          const errorMsg = document.getElementById('placeError');
+          
+          if (responses.placeType === 'Outro' && !responses.placeName) {
+              errorMsg.style.display = 'block';
+              return;
+          } else if (!responses.placeName && responses.placeType !== 'Outro') {
+              errorMsg.style.display = 'block';
+              return;
+          }
+          
+          errorMsg.style.display = 'none';
+          nextScreen(5);
+      }
+
+      // Envio do e-mail
+      function sendEmail() {
+          const templateParams = {
+              date: responses.date,
+              time: responses.time,
+              place_type: responses.placeType,
+              place_name: responses.placeName || "A ser definido"
+          };
+
+          emailjs.send("service_6a86s5w", "template_j0wfll9", templateParams)
+              .then(() => alert("🎉 Confirmado! Um e-mail com os detalhes foi enviado ao Mauricio! Te aguardo ansiosamente 🥰"))
+              .catch(() => alert("Oops! Algo deu errado."));
+      }
+    </script>
+</body>
+</html>
